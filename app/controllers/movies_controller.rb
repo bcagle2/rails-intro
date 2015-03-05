@@ -7,7 +7,28 @@ class MoviesController < ApplicationController
   end
 
   def index
-    @movies = Movie.all
+    redirect = false
+    if params[:sort_by] == nil
+      if session[:sort_by] != nil
+        @sorted_field = session[:sort_by].to_s
+        redirect = true
+      end
+    else
+      @sorted_field = params[:sort_by].to_s
+    end
+
+    if @sorted_field != nil
+      session.merge!({:sort_by=>@sorted_field})
+    end
+
+    if redirect == true
+      newParam = Hash.new
+      newParam.merge!({:sort_by=>@sorted_field})
+      redirect_to movies_path(newParam)
+    end
+
+    @movies = Movie.all(:order=>@sorted_field)
+    @highlight = @sorted_field
   end
 
   def new
